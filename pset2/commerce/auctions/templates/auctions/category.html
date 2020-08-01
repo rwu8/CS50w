@@ -1,0 +1,55 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+<form class="form-horizontal" action="{% url 'category' %}"  method="post">{% csrf_token %}
+    <fieldset>
+        <select name="category" id="">
+            <option value="" selected>Select an option</option>
+            {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.category }}</option>
+            {% endfor %}
+        </select>
+    </fieldset>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary" >Submit</button>
+    </div>
+</form>
+
+{% if category %}
+    <h2>Items with the Category: <strong>{{ category }}</strong></h2>
+
+    <div class="row row-cols-1 row-cols-md-3">
+        <div class="card-deck">
+            {% for auction in auctions %}
+                <div class="col mb-4">
+                    <div class="card">
+                        {% if auction.photo %}
+                            <a href="{% url 'listing' auction.id %}"><img src="{{ auction.photo }}" class="card-img-top" alt="Auction Photo"></a>
+                            <!-- <a href="listing/{{ auction.id }}"><img src="{{ auction.photo }}" class="card-img-top" alt="Auction Photo"></a> -->
+                        {% else %}
+                            <a href="{% url 'listing' auction.id %}"><p class="card-img-top" >NO IMAGE</p></a>
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ auction.title }}</h5>
+                            <p class="card-text">{{ auction.description }}</p>
+                            <p class="card-text">Created: {{ auction.created }}</p>
+                        </div>
+                        <div class="card-footer">
+                            <small class="text-muted">Added {{ auction.created }}</small>
+                        </div>
+                    </div>
+                </div>
+    
+            {% empty %}
+                <div class="col mb-12">
+                    <div class="alert alert-danger card" role="alert">
+                        No listings found.
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+{% endblock %}

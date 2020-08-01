@@ -1,0 +1,48 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+    <h2>Create Listing</h2>
+
+    {% if message %}
+        <div>{{ message }}</div>
+    {% endif %}
+
+    <form class="form-horizontal" action="{% url 'create' %}"  method="post">{% csrf_token %}
+        <fieldset>
+            <!-- <legend>{{ title }}</legend> -->
+            {% for field in form %}
+                {% if field.errors %}
+                    <div class="control-group error">
+                        <label class="control-label">{{ field.label }}</label> 
+                        <div class="controls">{{ field }}
+                            <span class="help-inline">
+                                {% for error in  field.errors %}{{ error }}{% endfor %}
+                            </span>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="control-group">
+                        <label class="control-label">{{ field.label }}</label> 
+                        <div class="controls">{{ field }}
+                            {% if field.help_text %}
+                                <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+            <select name="category" id="">
+                <option value="" selected>Select an option</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}">{{ category.category }}</option>
+                {% endfor %}
+            </select>
+        </fieldset>
+
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" >Submit</button>
+        </div>
+    </form>
+{% endblock %}

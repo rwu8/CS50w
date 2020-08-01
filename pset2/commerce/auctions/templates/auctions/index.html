@@ -1,0 +1,33 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Active Listings</h2>
+
+    <div class="row col-auto">
+        <div class="card-deck">
+
+    {% for auction in auctions %}
+        <div class="col mb-4">
+            <div class="card">
+                {% if auction.photo %}
+                    <a href="{% url 'listing' auction.id %}"><img src="{{ auction.photo }}" class="card-img-top" alt="Auction Photo"></a>
+                    <!-- <a href="listing/{{ auction.id }}"><img src="{{ auction.photo }}" class="card-img-top" alt="Auction Photo"></a> -->
+                {% else %}
+                    <a href="{% url 'listing' auction.id %}"><p class="card-img-top" >NO IMAGE</p></a>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ auction.title }}</h5>
+                    <p class="card-text">{{ auction.description }}</p>
+                    <p class="card-text">Listed By: {{ auction.listing_user }}</p>
+                </div>
+                <div class="card-footer">
+                    <small class="text-muted">Added {{ auction.created }}</small>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <li>No Listings.</li>
+    {% endfor %}
+        </div>
+    </div>
+{% endblock %}
