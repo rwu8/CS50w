@@ -1,5 +1,5 @@
 ## CS50w - CS50’s Web Programming with Python and JavaScript
-This will be used to track my progress through <a href='https://courses.edx.org/courses/course-v1:HarvardX+CS50W+Web/course/'>2020 CS50 intro course</a> assignments.
+This will be used to track my progress through <a href='https://courses.edx.org/courses/course-v1:HarvardX+CS50W+Web/course/'>2020 CS50 web programming course</a> assignments.
 You can find the materials for the course <a href='https://cs50.harvard.edu/web/2020/'>here</a>.
 
 ## Table Of Contents
