@@ -1,0 +1,68 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-3">
+      <div class="card">
+        <!-- <img src="..." class="card-img-top" alt="..."> -->
+        <div class="card-body">
+          <h3>User: {{ user.username }}</h3>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">Followers: {{ followers.count }}</li>
+          <li class="list-group-item">Following: {{ following.count }}</li>
+        </ul>
+        {% if requesting_user.is_authenticated %}
+          <div class="card-body">
+            {% if requesting_user != user %}
+              {% if not is_following %}
+                <form action="{% url 'user' user.id %}" method="post"> 
+                  {% csrf_token %}
+                  <input type="text" name="add_follow" value="add_follow" class="form-control" hidden>
+                  <input class="btn btn-primary" type="submit" value="Follow">
+                </form>
+              {% else %}
+                <form action="{% url 'user' user.id %}" method="post"> 
+                  {% csrf_token %}
+                  <input type="text" name="remove_follow" value="remove_follow" class="form-control" hidden>
+                  <input class="btn btn-primary" type="submit" value="Unfollow">
+                </form>
+              {% endif %}
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-9">
+      {% for post in posts %}
+        <div class="card">
+            <div class="card-header">
+                <a href="{% url 'user' user.id %}" class="text-decoration-none text-muted"> {{ post.user }} </a>
+            </div>
+            <div class="card-body">
+            {% if post.user == request.user %}
+            <a href="#" class="text-decoration-none">Edit</a>
+            {% endif %}
+            <p class="card-text">{{ post.body }}</p>
+            <p class="card-text"><i class="fa fa-heart" aria-hidden="true" style="color:red"></i> <span id="num-likes">0</span></p>
+            <p class="card-text" id="comment" data-id={{ post.id }}>Comment</p>
+            </div>
+            <div class="card-footer text-muted">
+            {{ post.timestamp }}
+            </div>
+        </div>
+        {% empty %}
+        <div>No posts.</div>
+      {% endfor %}
+      </div>  
+  </div>
+</div>
+
+
+
+
+
+{% endblock %}
