@@ -3,6 +3,7 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.core.paginator import Paginator
 
 from .models import User, UserFollowing, Post, Comment, Like
 
@@ -27,11 +28,13 @@ def index(request):
     if request.method == "POST":
         post = Post(user=request.user, body=request.POST["post"], comments=None, likes=None)
         post.save()
-        # return HttpResponseRedirect(reverse("index"))
-    # else:
-    posts = Post.objects.all()
+    posts = Post.objects.all().order_by('-timestamp')
+    p = Paginator(posts, 10)
+    page_number = request.GET.get('page')
+    page_obj = p.get_page(page_number)
     return render(request, "network/index.html", {
-        "posts": posts
+        "posts": page_obj,
+        "pages": p
     })
 
 
@@ -126,12 +129,16 @@ def user_view(request, user_id):
 
     # display posts in reverse chronological order
     user_posts = Post.objects.filter(user=user).order_by('-timestamp')
+    p = Paginator(user_posts, 10)
+    page_number = request.GET.get('page')
+    page_obj = p.get_page(page_number)
 
     return render(request, "network/user.html", {
         "user": user,
         "following": following,
         "followers": followers,
-        "posts": user_posts,
+        "posts": page_obj,
+        "pages": p,
         "requesting_user": requesting_user,
         "is_following": is_following
     })
