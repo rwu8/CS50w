@@ -1,10 +1,11 @@
+import json
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.core.paginator import Paginator
-
+import datetime
 from .models import User, UserFollowing, Post, Comment, Like
 
 
@@ -64,17 +65,20 @@ def logout_view(request):
 
 
 def post_view(request, post_id):
-    if request.method == "POST":
-        # TODO
-        pass
-    else:
-        print(post_id)
-        post = Post.objects.get(pk=post_id)
-
-        print('post item is', post)
-        return render(request, "network/post.html", {
-            "post": post
-        })
+    # print(request.POST)
+    # Query for requested post
+    try:
+        post = Post.objects.get(user=request.user, pk=post_id)
+    except Post.DoesNotExist:
+        return JsonResponse({"error": "Post not found."}, status=404)
+    
+    # Update the posts body and timestamp 
+    if request.method == "PUT":
+        data = json.loads(request.body)
+        post.body = data['body']
+        post.timestamp =  '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now())
+        post.save()
+        return HttpResponse(status=204)
 
 
 def register(request):

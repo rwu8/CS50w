@@ -9,20 +9,39 @@ document.addEventListener('DOMContentLoaded', function() {
     )
 }) 
 
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 function createForm(parentElem) {
     const body = parentElem['children'][1];
-    console.log(body);
+    // console.log(body);
+    const post_id = parentElem['id'].split('-')[1];
     const old_body_content = body['children'][1].innerHTML;
     body.innerHTML = '';
 
     const form = document.createElement('form');
     form.classList.add('mb-3');
+    form.setAttribute('data-id', parentElem['id'])
+    form.action = `/post/${post_id}`
 
-    const inputElem = document.createElement('input');
-    inputElem.type = 'hidden';
-    inputElem.name = 'csrfmiddlewaretoken';
-    inputElem.value = CSRF_TOKEN;
-    form.appendChild(inputElem);
+    // const inputElem = document.createElement('input');
+    // inputElem.type = 'hidden';
+    // inputElem.name = 'csrfmiddlewaretoken';
+    // inputElem.value = CSRF_TOKEN;
+    // form.appendChild(inputElem);
 
     const div = document.createElement('div');
     div.classList.add('form-group');
@@ -49,14 +68,74 @@ function createForm(parentElem) {
     
     form.append(div);
     form.append(input);
-    form.onsubmit = () => {
-        console.log('submitted!');
-        // TODO need to async update the data
+    form.onsubmit = (e) => {
+        // get data to update
+        const post_id = e['target'].getAttribute('data-id').split('-')[1];
+        const updated_post = e['target'][0].value;
+        console.log(post_id, updated_post);
 
+        // set our CSRF token for AJAX request: https://docs.djangoproject.com/en/dev/ref/csrf/#ajax
+        const csrftoken = getCookie('csrftoken');
+        const request = new Request(
+            `/post/${post_id}`,
+            {headers: {'X-CSRFToken': csrftoken}}
+        );
 
+        // update our post
+        fetch(request, {
+            method: 'PUT',
+            mode: 'same-origin',
+            body: JSON.stringify({
+                id: post_id,
+                body: updated_post
+                }),
+        })
+        
+        body.innerHTML = '';
+        replacePostContent(post_id, body, updated_post);
+        
         // Stop form from submitting
         return false;
     }
     
     body.append(form);
+}
+
+function replacePostContent(post_id, parent, updated_post) {
+
+    const a = document.createElement('a');
+    a.href = "#";
+    a.classList.add('text-decoration-none');
+    a.classList.add('edit-link');
+    a.setAttribute('aria-hidden', 'true');
+    a.setAttribute('data-id', `post-${post_id}`);
+    a.innerHTML = 'Edit';
+
+    const post_body = document.createElement('p');
+    post_body.classList.add('card-text');
+    post_body.innerHTML = updated_post;
+
+    const likes = document.createElement('p');
+    likes.classList.add('card-text');
+    const heart_icon = document.createElement('i');
+    heart_icon.classList.add('fa');
+    heart_icon.classList.add('fa-heart');
+    heart_icon.setAttribute('aria-hidden', 'true');
+    heart_icon.style.color =  'red';
+    const num_likes = document.createElement('span');
+    num_likes.id = 'num-likes';
+    num_likes.innerHTML = ' 0';
+    likes.append(heart_icon);
+    likes.append(num_likes);
+
+    const comment = document.createElement('p');
+    comment.classList.add('card-text');
+    comment.id = 'comment'
+    comment.setAttribute('data-id', `post-${post_id}`);
+    comment.innerHTML = 'Comment';
+
+    parent.append(a);
+    parent.append(post_body);
+    parent.append(likes);
+    parent.append(comment);
 }

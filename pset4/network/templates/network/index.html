@@ -72,16 +72,12 @@
                 {% endif %}
             </ul>
         </nav>
-    </div>
+        </div>
     {% endif %}
 </div>
 
 {% block script %}
-    <script>
-        const CSRF_TOKEN = '{{ csrf_token }}';
-    </script>
     <script src="{% static 'network/network.js' %}"></script>
 {% endblock %}
 
 {% endblock %}
-
