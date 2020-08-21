@@ -15,17 +15,17 @@
     </form> 
     {% endif %}
     {% for post in posts %}
-        <div class="card mb-3">
+        <div class="card mb-3" id="post-{{ post.id }}">
             <div class="card-header">
                <a href="{% url 'user' post.user.id %}" class="text-decoration-none text-muted"> {{ post.user }} </a>
             </div>
             <div class="card-body">
             {% if post.user == request.user %}
-            <a href="#" class="text-decoration-none">Edit</a>
+            <a href="#" class="text-decoration-none edit-link" data-id="post-{{ post.id }}">Edit</a>
             {% endif %}
             <p class="card-text">{{ post.body }}</p>
             <p class="card-text"><i class="fa fa-heart" aria-hidden="true" style="color:red"></i> <span id="num-likes">0</span></p>
-            <p class="card-text" id="comment" data-id={{ post.id }}>Comment</p>
+            <p class="card-text" id="comment" data-id="post-{{ post.id }}">Comment</p>
             </div>
             <div class="card-footer text-muted">
             {{ post.timestamp }}
@@ -75,8 +75,13 @@
     </div>
     {% endif %}
 </div>
-{% endblock %}
 
 {% block script %}
+    <script>
+        const CSRF_TOKEN = '{{ csrf_token }}';
+    </script>
     <script src="{% static 'network/network.js' %}"></script>
 {% endblock %}
+
+{% endblock %}
+
