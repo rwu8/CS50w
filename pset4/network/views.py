@@ -47,14 +47,17 @@ def following_view(request):
     user = User.objects.get(pk=request.user.id)
     followers = user.followers.all()
     posts = []
-    # print('length: ', len(followers))
+    
     if len(followers) > 0:
         for user in followers:
             posts.append(Post.objects.filter(user=user.user_id))
         posts = posts[0]
-
+        p = Paginator(posts, 10)
+        page_number = request.GET.get('page')
+        page_obj = p.get_page(page_number)
     return render(request, "network/following.html", {
-            "posts": posts
+            "posts": page_obj,
+            "pages": p
         })
 
 

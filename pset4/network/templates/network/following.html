@@ -5,21 +5,73 @@
 <div class="container-fluid">
   <h1>What's happening?</h1>
     {% for post in posts %}
-      <div class="card">
+      <div class="card mb-3" id="post-{{ post.id }}">
         <div class="card-header">
           <a href="{% url 'user' post.user.id %}" class="text-decoration-none text-muted"> {{ post.user }} </a>
         </div>
         <div class="card-body">
-        <p class="card-text">{{ post.body }}</p>
-        <p class="card-text"><i class="fa fa-heart" aria-hidden="true" style="color:red"></i> <span id="num-likes">0</span></p>
-        <p class="card-text" id="comment" data-id={{ post.id }}>Comment</p>
+        {% if post.user == request.user %}
+        <a href="#/" class="text-decoration-none edit-link" data-id="post-{{ post.id }}">Edit</a>
+        {% endif %}
+        <pre class="card-text" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif">{{ post.body }}</pre>
+        <a href="#/" class="text-decoration-none like-link" data-id="post-{{ post.id }}"><i class="fa fa-heart" aria-hidden="true" style="color:red"></i> <span> {{ post.total_likes }}</span></a>
+        <p><a href="{% url 'comment' post.id %}" class="btn btn-primary">Comment</a></p>
         </div>
-        <div class="card-footer text-muted">
-        {{ post.timestamp }}
+        <div class="card-footer text-muted d-flex justify-content-between">
+            <p>{{ post.timestamp }}</p>
+            {% if post.user == request.user %}
+            <form action="{% url 'post' post.id %}" method="post">
+                {% csrf_token %}
+                <div class="form-actions">
+                    <input type="text" name="remove_post" value="remove_post" class="form-control" hidden>
+                    <button type="submit" class="btn btn-danger">Delete Post</button> 
+                </div>
+            </form>
+            {% endif %}
         </div>
       </div>
     {% empty %}
       <div>No posts.</div>
     {% endfor %}
+
+    {% if pages.num_pages > 1 %}
+    <div class="row justify-content-center">
+        <nav aria-label="Search results pages">
+            <ul class="pagination">
+                {% if posts.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ posts.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link" href="?page=#" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for page_num in pages.page_range %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a></li>
+                {% endfor %}
+
+                {% if posts.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ posts.next_page_number }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link" href="?page=#" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        </div>
+    {% endif %}
 </div>  
 {% endblock %}
