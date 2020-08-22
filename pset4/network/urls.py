@@ -12,6 +12,7 @@ urlpatterns = [
     path("register", views.register, name="register"),
 
     # API routes
+    path("comment/<int:post_id>", views.comment_view, name="comment"),
     path("like/<int:post_id>", views.like_view, name="like"),
     path("post/<int:post_id>", views.post_view, name="post"),
 ]

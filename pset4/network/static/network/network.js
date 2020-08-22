@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const like_buttons = document.querySelectorAll('.like-link');
 
     edit_buttons.forEach(button => button.addEventListener('click', () => {
+        console.log(button['parentElement'])
         createForm(button['parentElement']['parentElement']);
         return false;
         })
@@ -88,6 +89,7 @@ function createForm(parentElem) {
     input.value = 'Post';
     input.type = 'submit';
     
+
     form.append(div);
     form.append(input);
     form.onsubmit = (e) => {
@@ -124,7 +126,6 @@ function createForm(parentElem) {
 }
 
 function replacePostContent(post_id, parent, updated_post) {
-
     const a = document.createElement('a');
     a.href = "#";
     a.classList.add('text-decoration-none');
@@ -133,8 +134,9 @@ function replacePostContent(post_id, parent, updated_post) {
     a.setAttribute('data-id', `post-${post_id}`);
     a.innerHTML = 'Edit';
 
-    const post_body = document.createElement('p');
+    const post_body = document.createElement('pre');
     post_body.classList.add('card-text');
+    post_body.style.fontFamily = '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, sans-serif';
     post_body.innerHTML = updated_post;
 
     const likes = document.createElement('a');
@@ -153,10 +155,12 @@ function replacePostContent(post_id, parent, updated_post) {
     likes.append(num_likes);
 
     const comment = document.createElement('p');
-    comment.classList.add('card-text');
-    comment.id = 'comment'
-    comment.setAttribute('data-id', `post-${post_id}`);
-    comment.innerHTML = 'Comment';
+    const comment_link = document.createElement('a');
+    comment_link.href = `/comment/${post_id}`;
+    comment_link.classList.add('btn');
+    comment_link.classList.add('btn-primary');
+    comment_link.innerHTML = 'Comment';
+    comment.append(comment_link);
 
     parent.append(a);
     parent.append(post_body);

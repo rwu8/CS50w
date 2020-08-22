@@ -9,6 +9,39 @@ import datetime
 from .models import User, UserFollowing, Post, Comment, Like
 
 
+def comment_view(request, post_id):
+    post = Post.objects.get(pk=post_id)
+
+    # delete user comment
+    if "remove_comment" in request.POST:
+        if request.POST["remove_comment"]:
+            comment = Comment.objects.get(pk=request.POST['comment_id'])
+            comment.delete()
+
+            comments = Comment.objects.filter(post=post)
+            return render(request, "network/comment.html", {
+                'post': post,
+                'comments': comments
+            })
+
+    try:
+        comments = Comment.objects.filter(post=post)
+    except:
+        comments = []
+    
+    if request.method == "POST":
+        comment_body = request.POST["post"]
+        new_comment = Comment(comment=comment_body, user=request.user, post=post)
+        new_comment.save()
+    
+    comments = Comment.objects.filter(post=post)
+    return render(request, "network/comment.html", {
+        'post': post,
+        'comments': comments
+    })
+
+
+
 def following_view(request):
     # TODO
     user = User.objects.get(pk=request.user.id)
@@ -24,9 +57,10 @@ def following_view(request):
             "posts": posts
         })
 
+
 def index(request):
     if request.method == "POST":
-        post = Post(user=request.user, body=request.POST["post"], comments=None, likes=None)
+        post = Post(user=request.user, body=request.POST["post"], comments=None)
         post.save()
     posts = Post.objects.all().order_by('-timestamp')
     p = Paginator(posts, 10)
@@ -108,6 +142,13 @@ def logout_view(request):
 
 
 def post_view(request, post_id):
+    # delete user post
+    if "remove_post" in request.POST:
+        if request.POST["remove_post"]:
+            post = Post.objects.get(user=request.user, pk=post_id)
+            post.delete()
+            return HttpResponseRedirect(reverse("index"))
+
     # Query for requested post
     try:
         post = Post.objects.get(user=request.user, pk=post_id)
@@ -151,8 +192,10 @@ def register(request):
 
 
 def user_view(request, user_id):
-    # TODO
-    requesting_user = User.objects.get(pk=request.user.id)
+    try:
+        requesting_user = User.objects.get(pk=request.user.id)
+    except:
+        requesting_user = None
     user = User.objects.get(pk=user_id)
 
     if request.method == "POST":
