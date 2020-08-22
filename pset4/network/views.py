@@ -1,7 +1,7 @@
 import json
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.core.paginator import Paginator
@@ -19,7 +19,6 @@ def following_view(request):
         for user in followers:
             posts.append(Post.objects.filter(user=user.user_id))
         posts = posts[0]
-    
 
     return render(request, "network/following.html", {
             "posts": posts
@@ -37,6 +36,50 @@ def index(request):
         "posts": page_obj,
         "pages": p
     })
+
+
+def like_view(request, post_id):
+    if request.method == "POST":
+        post = Post.objects.get(pk=post_id)
+        # Query for requested Like
+        try:
+            like = Like.objects.get(user=request.user, post=post)
+            print(like)
+            # The Like exists aready, check if currently liking post
+            if like and like.currently_liked == True:
+                like.currently_liked = False
+                post.total_likes -= 1
+                post.user_likes.remove(request.user)
+                post.save()           
+                like.save()
+                # Respond with success status
+                return HttpResponse(status=204)
+            elif like and like.currently_liked == False:
+                print('else', like)
+                like.currently_liked = True
+                post.total_likes += 1
+                post.user_likes.add(request.user)
+                post.save()
+                like.save()
+                # Respond with success status
+                return HttpResponse(status=204)
+        
+        # The Like is new
+        except Like.DoesNotExist:
+            new_like = Like(user=request.user, post=post, currently_liked=True)
+            # print(new_like)
+            post.total_likes += 1
+            post.user_likes.add(request.user)
+            post.save()
+            new_like.save()
+            # Respond with success status
+            return HttpResponse(status=204)
+    
+    if request.method == "GET":
+        print("GET METHOD")
+        post = Post.objects.get(pk=post_id)
+        print("NUMBER OF LIKES", post.total_likes)
+        return JsonResponse(post.total_likes, safe=False)
 
 
 def login_view(request):
@@ -65,7 +108,6 @@ def logout_view(request):
 
 
 def post_view(request, post_id):
-    # print(request.POST)
     # Query for requested post
     try:
         post = Post.objects.get(user=request.user, pk=post_id)

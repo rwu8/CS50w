@@ -23,7 +23,8 @@ class Post(models.Model):
     user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="posts")
     body = models.TextField(blank=True)
     comments = models.ForeignKey("Comment", null=True, on_delete=models.CASCADE, related_name="comments")
-    likes = models.ForeignKey("Like", null=True, on_delete=models.CASCADE, related_name="likes")
+    total_likes = models.PositiveIntegerField(default=0)
+    user_likes = models.ManyToManyField(User)
     timestamp = models.DateTimeField(auto_now_add=True)
 
 class Comment(models.Model):
@@ -35,4 +36,5 @@ class Comment(models.Model):
 class Like(models.Model):
     user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="user_likes")
     post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="post_likes")
+    currently_liked = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)

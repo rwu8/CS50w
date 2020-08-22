@@ -1,12 +1,40 @@
 document.addEventListener('DOMContentLoaded', function() {
     // const cards = document.querySelectorAll('.edit-link');
     const edit_buttons = document.querySelectorAll('.edit-link');
-    
+    const like_buttons = document.querySelectorAll('.like-link');
+
     edit_buttons.forEach(button => button.addEventListener('click', () => {
         createForm(button['parentElement']['parentElement']);
         return false;
         })
     )
+
+    like_buttons.forEach(button => button.addEventListener('click', () => {
+        const post_id = button.getAttribute('data-id').split('-')[1];
+
+        // set our CSRF token for AJAX request: https://docs.djangoproject.com/en/dev/ref/csrf/#ajax
+        const csrftoken = getCookie('csrftoken');
+        const request = new Request(
+            `/like/${post_id}`,
+            {headers: {'X-CSRFToken': csrftoken}}
+        );
+
+        // update our post
+        fetch(request, {
+            method: 'POST',
+            mode: 'same-origin',
+            body: JSON.stringify({
+                id: post_id,
+                }),
+        })
+
+        // Fetch the mailbox requested 
+        fetch(`/like/${post_id}`)
+        .then(response => response.json())
+        .then(likes => {
+            button['children'][1].innerHTML = likes;
+        })
+    }))
 }) 
 
 function getCookie(name) {
@@ -36,12 +64,6 @@ function createForm(parentElem) {
     form.classList.add('mb-3');
     form.setAttribute('data-id', parentElem['id'])
     form.action = `/post/${post_id}`
-
-    // const inputElem = document.createElement('input');
-    // inputElem.type = 'hidden';
-    // inputElem.name = 'csrfmiddlewaretoken';
-    // inputElem.value = CSRF_TOKEN;
-    // form.appendChild(inputElem);
 
     const div = document.createElement('div');
     div.classList.add('form-group');
@@ -115,8 +137,10 @@ function replacePostContent(post_id, parent, updated_post) {
     post_body.classList.add('card-text');
     post_body.innerHTML = updated_post;
 
-    const likes = document.createElement('p');
-    likes.classList.add('card-text');
+    const likes = document.createElement('a');
+    likes.classList.add('text-decoration-none');
+    likes.classList.add('like-link');
+    likes.setAttribute('data-id', `post-${post_id}`);
     const heart_icon = document.createElement('i');
     heart_icon.classList.add('fa');
     heart_icon.classList.add('fa-heart');

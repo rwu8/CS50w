@@ -21,10 +21,10 @@
             </div>
             <div class="card-body">
             {% if post.user == request.user %}
-            <a href="#" class="text-decoration-none edit-link" data-id="post-{{ post.id }}">Edit</a>
+            <a href="#/" class="text-decoration-none edit-link" data-id="post-{{ post.id }}">Edit</a>
             {% endif %}
             <p class="card-text">{{ post.body }}</p>
-            <p class="card-text"><i class="fa fa-heart" aria-hidden="true" style="color:red"></i> <span id="num-likes">0</span></p>
+            <a href="#/" class="text-decoration-none like-link" data-id="post-{{ post.id }}"><i class="fa fa-heart" aria-hidden="true" style="color:red"></i> <span> {{ post.total_likes }}</span></p>
             <p class="card-text" id="comment" data-id="post-{{ post.id }}">Comment</p>
             </div>
             <div class="card-footer text-muted">
